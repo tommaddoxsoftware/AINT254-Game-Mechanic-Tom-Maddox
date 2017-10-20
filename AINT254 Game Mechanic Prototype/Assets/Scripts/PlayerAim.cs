@@ -13,8 +13,8 @@ public class PlayerAim : MonoBehaviour {
     [SerializeField] private float m_max_force; //Maximum force that can be applied
     private float m_force = 8.0f;
 
-    private Vector3 mouseStart;
-    private Vector3 mouseEnd;
+    private Vector3 m_mouseDownPos;
+    private Vector3 m_mouseUpPos;
 
     private Rigidbody m_rigidbody; //Rigidbody of the player object
 
@@ -47,11 +47,14 @@ public class PlayerAim : MonoBehaviour {
      
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
-            mouseStart = Input.mousePosition;
-            mouseStart.y = 0; //We're not aiming up/down. Just forwards, and angle
+            m_mouseDownPos = Input.mousePosition;
+            Debug.Log("The mouseDownPos is: " + m_mouseDownPos);
+            m_mouseDownPos.z = 0;
         }
     if (UnityEngine.Input.GetMouseButtonUp(0))
         {
+            
+            Debug.Log("The mouseUpPos is: " + m_mouseUpPos);
             m_rigidbody.velocity = m_direction * m_force;
             for(int i=0; i<aimObjects.Length; i++)
             {
@@ -61,10 +64,11 @@ public class PlayerAim : MonoBehaviour {
 
     if(Input.GetMouseButton(0))
         {
-            mouseEnd = Input.mousePosition;
+            m_mouseUpPos = Input.mousePosition;
+            m_mouseUpPos.z = 0;
             Vector3 charPosition = Camera.main.WorldToScreenPoint(m_transform.position);
-            m_direction = (charPosition + mouseEnd).normalized;
-
+            m_direction = (charPosition - m_mouseDownPos).normalized;
+           
             Aim();
 
         }
@@ -73,13 +77,12 @@ public class PlayerAim : MonoBehaviour {
     }
     private void Aim()
     {
-        float Vx = m_direction.x * m_force;
-        float Vz = m_direction.z * m_force;
+
 
         for(int i=0; i<aimObjects.Length; i++)
         {
-            float t = i * 0.1f;
-            aimObjects[i].transform.position = new Vector3(m_transform.position.x + Vx * t, 0, m_transform.position.z + Vz * t);
+            float t = i * 1.0f;
+            aimObjects[i].transform.position = new Vector3(m_transform.position.x , m_transform.position.y, (m_transform.position.z + t) );
             aimObjects[i].SetActive(true);
         }
     }
