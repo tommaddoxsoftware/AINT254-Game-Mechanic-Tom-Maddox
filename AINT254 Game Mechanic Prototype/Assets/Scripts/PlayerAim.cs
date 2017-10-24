@@ -5,40 +5,36 @@ using UnityEngine;
 public class PlayerAim : MonoBehaviour {
 
     [SerializeField] private GameObject aimPrefab; //The prefab that will create the aim line
-    private GameObject[] aimObjects; //Used to store prefabs in an array
+    private GameObject aimObject; //Used to store prefabs in an array
 
     private Transform m_transform;
     private Vector3 m_direction; //Hold the direction player is aiming in
     [SerializeField] private float m_min_force; //Minimum force that can be applied
     [SerializeField] private float m_max_force; //Maximum force that can be applied
-    private float m_force = 8.0f;
+    [SerializeField] private float m_force = 1000f;
 
     private Vector3 m_mouseDownPos;
     private Vector3 m_mouseUpPos;
+
+    [SerializeField] private GameObject aimContainer;
 
     private Rigidbody m_rigidbody; //Rigidbody of the player object
 
 	// Use this for initialization
 	void Start () {
+      
 
         //Create Transform reference - Efficiency!
         m_transform = transform;
 
-        //Initialise array of aimObjects - 10 length
-        aimObjects = new GameObject[10];
 
         //Get the rigidbody
         m_rigidbody = GetComponent<Rigidbody>();
 
-        //Loop through and populate the array with prefabs
-        for(int i=0; i<aimObjects.Length; i++)
-        {
-            //Instantiate the object, hide it then store it
-            GameObject tempObj = Instantiate(aimPrefab);            
-            tempObj.SetActive(false);
-            aimObjects[i] = tempObj;
-        }
-		
+        
+            aimObject = Instantiate(aimPrefab);
+            aimObject.SetActive(false);
+            aimObject.transform.parent = aimContainer.transform;		
 	}
 	
 	// Update is called once per frame
@@ -47,19 +43,19 @@ public class PlayerAim : MonoBehaviour {
      
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
-            m_mouseDownPos = Input.mousePosition;
-            Debug.Log("The mouseDownPos is: " + m_mouseDownPos);
+            m_mouseDownPos = Input.mousePosition;    
             m_mouseDownPos.z = 0;
         }
     if (UnityEngine.Input.GetMouseButtonUp(0))
-        {
-            
-            Debug.Log("The mouseUpPos is: " + m_mouseUpPos);
-            m_rigidbody.velocity = m_direction * m_force;
-            for(int i=0; i<aimObjects.Length; i++)
+        {            
+           //Ensure player cant move whilst car is still in motion
+            if (m_rigidbody.velocity == new Vector3(0, 0, 0))
             {
-                aimObjects[i].SetActive(false);
-            }
+                m_rigidbody.AddForce(transform.forward * m_force);
+            }            
+
+                aimObject.SetActive(false);
+
         }
 
     if(Input.GetMouseButton(0))
@@ -67,23 +63,22 @@ public class PlayerAim : MonoBehaviour {
             m_mouseUpPos = Input.mousePosition;
             m_mouseUpPos.z = 0;
             Vector3 charPosition = Camera.main.WorldToScreenPoint(m_transform.position);
-            m_direction = (charPosition - m_mouseDownPos).normalized;
-           
-            Aim();
+            if (m_rigidbody.velocity == new Vector3(0, 0, 0))
+            {
+                float rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
+                m_transform.rotation = Quaternion.Euler(0, rotAngle, 0);
+                aimContainer.transform.rotation = m_transform.rotation;
+                Aim();
+            }
 
         }
-
-
     }
+
+    //Some notes - Camera X is left/right,, Camera Y is up/down. Z not used.
     private void Aim()
-    {
-
-
-        for(int i=0; i<aimObjects.Length; i++)
-        {
-            float t = i * 1.0f;
-            aimObjects[i].transform.position = new Vector3(m_transform.position.x , m_transform.position.y, (m_transform.position.z + t) );
-            aimObjects[i].SetActive(true);
+        {    
+            aimObject.transform.position = aimContainer.transform.position;
+            aimObject.SetActive(true);
         }
-    }
+    
 }
