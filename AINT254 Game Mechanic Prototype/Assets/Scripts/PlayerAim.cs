@@ -4,58 +4,52 @@ using UnityEditor;
 using UnityEngine;
 
 public class PlayerAim : MonoBehaviour {
+    private GameObject uiManager;
 
     [SerializeField] private GameObject aimPrefab; //The prefab that will create the aim line
     private GameObject aimObject; //Used to store prefabs in an array
+    [SerializeField] private GameObject aimContainer; //Where the aim prefab will be placed
 
-    private Transform m_transform;
-    private Vector3 m_direction; //Hold the direction player is aiming in
+    private Transform m_transform; //Make a reference for the transform
+    private Rigidbody m_rigidbody; //Rigidbody of the player object
+
+    //Vars for the force
     [SerializeField] private float base_force = 500f;
     private float m_force;
     
+    //Mouse Positions
     private Vector3 m_mouseDownPos;
     private Vector3 m_mouseUpPos;
-
-    [SerializeField] Transform uiTransform;
-    [SerializeField] Transform uiLastPos;   
-
-    [SerializeField] private GameObject aimContainer;
-
-    private Rigidbody m_rigidbody; //Rigidbody of the player object
-        
-    float gameMaxY;
     float m_mouseDiffY;
-    
+
+    //Useful Calculation vars for mouse drag
+    float gameMaxY;
     float diffPercentPower;
-    float oldPercent = 0;
+
 
     // Use this for initialization
     void Start () {
-
-        //Set power bar scale to 0
-        uiTransform.transform.localScale = new Vector3(1, 0, 1);
-        uiLastPos.transform.localScale = new Vector3(1, 0, 1);
+       
         //Find Width and height of the camera - used to find percentage difference with mouse drag
         string[] res = UnityStats.screenRes.Split('x');
-        gameMaxY = float.Parse(res[1]);
-       
+        gameMaxY = float.Parse(res[1]);       
 
         //Create Transform reference - Efficiency!
         m_transform = transform;
-
-
+        
         //Get the rigidbody
         m_rigidbody = GetComponent<Rigidbody>();
 
-        
-            aimObject = Instantiate(aimPrefab);
-            aimObject.SetActive(false);
-            aimObject.transform.parent = aimContainer.transform;		
+        //Instantiate the aim line
+        aimObject = Instantiate(aimPrefab);
+        aimObject.SetActive(false);
+        aimObject.transform.parent = aimContainer.transform;
+
+        uiManager = GameObject.Find("UIController");
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        
+	void Update () {        
      
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
@@ -73,8 +67,9 @@ public class PlayerAim : MonoBehaviour {
                 if(m_force > 0)
                 m_rigidbody.AddForce(transform.forward * (m_force));
 
-                uiLastPos.localScale = uiTransform.localScale;
-                uiTransform.localScale = new Vector3(1, 0, 1);
+                //Scale UI power bars!
+                uiManager.GetComponent<UIController>().SetLastPosScale();
+                uiManager.GetComponent<UIController>().ResetPowerBar();
                 
             }
                 aimObject.SetActive(false);
@@ -102,7 +97,7 @@ public class PlayerAim : MonoBehaviour {
                 diffPercentPower = 100;
             
             //Scale power bar appropriately
-            uiTransform.localScale = new Vector3(1,diffPercentPower / 100,1);
+            uiManager.GetComponent<UIController>().ScalePowerBar(new Vector3(1, diffPercentPower / 100, 1));
 
         }
     }
