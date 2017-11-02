@@ -26,6 +26,8 @@ public class PlayerAim : MonoBehaviour {
     float gameMaxY;
     float diffPercentPower;
 
+    //Check if object is touching environment
+    private bool isTouching = false;
 
     // Use this for initialization
     void Start () {
@@ -51,6 +53,7 @@ public class PlayerAim : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {        
      
+     
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
             m_mouseDownPos = Input.mousePosition;    
@@ -59,7 +62,7 @@ public class PlayerAim : MonoBehaviour {
     if (UnityEngine.Input.GetMouseButtonUp(0))
         {            
            //Ensure player cant move whilst car is still in motion
-            if (m_rigidbody.velocity == new Vector3(0, 0, 0))
+            if (m_rigidbody.velocity == new Vector3(0, 0, 0) || isTouching == true)
             {   
                 //Modify force based on how much the mouse was dragged, then apply the force
                 m_force = base_force * (diffPercentPower/5);
@@ -79,8 +82,8 @@ public class PlayerAim : MonoBehaviour {
         {
             m_mouseUpPos = Input.mousePosition;
             m_mouseUpPos.z = 0;
-           
-            if (m_rigidbody.velocity == new Vector3(0, 0, 0))
+
+            if (m_rigidbody.velocity == new Vector3(0, 0, 0) || isTouching == true)
             {
                 float rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
                 m_transform.rotation = Quaternion.Euler(0, rotAngle, 0);
@@ -108,5 +111,19 @@ public class PlayerAim : MonoBehaviour {
             aimObject.transform.position = aimContainer.transform.position;
             aimObject.SetActive(true);
         }
-    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Obstacle")
+        {
+            isTouching = true;
+            Debug.Log("IsTouching True");
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Obstacle")
+        {
+            isTouching = false;
+        }
+    }
 }
