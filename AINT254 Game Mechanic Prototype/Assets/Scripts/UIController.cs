@@ -5,6 +5,7 @@ using UnityEngine;
 public class UIController : MonoBehaviour {
     [SerializeField] Transform uiTransform;
     [SerializeField] Transform uiLastPos;
+    [SerializeField] GameObject winGameUI;
 
     private void Start()
     {
@@ -26,5 +27,10 @@ public class UIController : MonoBehaviour {
     public void SetLastPosScale()
     {
         uiLastPos.transform.localScale = uiTransform.transform.localScale;
+    }
+
+    public void EndGameUI()
+    {
+        winGameUI.SetActive(true);
     }
 }
