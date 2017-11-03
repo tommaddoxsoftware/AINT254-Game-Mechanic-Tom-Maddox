@@ -28,9 +28,11 @@ public class PlayerAim : MonoBehaviour {
 
     //Check if object is touching environment
     private bool isTouching = false;
+    private bool moving = false;
 
     // Use this for initialization
     void Start () {
+
        
         //Find Width and height of the camera - used to find percentage difference with mouse drag
         string[] res = UnityStats.screenRes.Split('x');
@@ -62,13 +64,14 @@ public class PlayerAim : MonoBehaviour {
     if (UnityEngine.Input.GetMouseButtonUp(0))
         {            
            //Ensure player cant move whilst car is still in motion
-            if (m_rigidbody.velocity == new Vector3(0, 0, 0) || isTouching == true)
+            if (!moving)
             {   
                 //Modify force based on how much the mouse was dragged, then apply the force
                 m_force = base_force * (diffPercentPower/5);
                 Debug.Log("m_force:" + m_force);
                 if(m_force > 0)
                 m_rigidbody.AddForce(transform.forward * (m_force));
+                moving = true;
 
                 //Scale UI power bars!
                 uiManager.GetComponent<UIController>().SetLastPosScale();
@@ -83,11 +86,11 @@ public class PlayerAim : MonoBehaviour {
             m_mouseUpPos = Input.mousePosition;
             m_mouseUpPos.z = 0;
 
-            if (m_rigidbody.velocity == new Vector3(0, 0, 0) || isTouching == true)
+            if (!moving)
             {
                 float rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
-                m_transform.rotation = Quaternion.Euler(0, rotAngle, 0);
-                aimContainer.transform.rotation = m_transform.rotation;
+                m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
+                aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
                 Aim();
             }
 
@@ -104,6 +107,14 @@ public class PlayerAim : MonoBehaviour {
 
         }
     }
+    private void FixedUpdate()
+    {
+        if (m_rigidbody.velocity == new Vector3(0, 0, 0))
+        {
+            moving = false;           
+        }
+        
+    }
 
     //Some notes - Camera X is left/right,, Camera Y is up/down. Z not used.
     private void Aim()
@@ -117,6 +128,13 @@ public class PlayerAim : MonoBehaviour {
         {
             isTouching = true;
             Debug.Log("IsTouching True");
+        }
+
+        if(other.tag == "Finish")
+        {
+            //Display End UI
+
+            uiManager.GetComponent<UIController>().EndGameUI();
         }
     }
     private void OnTriggerExit(Collider other)
