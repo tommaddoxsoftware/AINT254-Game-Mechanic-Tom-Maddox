@@ -8,5 +8,6 @@ public class GameManagerScript : MonoBehaviour {
     public void PlayAgain()
     {
         SceneManager.LoadScene("StuntScene");
+        Debug.Log("Scene Loaded");
     }
 }

@@ -28,11 +28,12 @@ public class PlayerAim : MonoBehaviour {
     float gameMaxY;
     float diffPercentPower;
 
+    //Used to check what's happening in the game
     private bool moving = false;
     private bool angleSet = false;
 
     private UIController uiControl;
-    [SerializeField] GameObject angleSetUI;
+
 
     // Use this for initialization
     void Start () {
