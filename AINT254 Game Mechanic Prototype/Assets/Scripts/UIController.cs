@@ -1,11 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIController : MonoBehaviour {
     [SerializeField] Transform uiTransform;
     [SerializeField] Transform uiLastPos;
     [SerializeField] GameObject winGameUI;
+    [SerializeField] GameObject[] uiTexts = new GameObject[10];
 
     private void Start()
     {
@@ -32,5 +35,31 @@ public class UIController : MonoBehaviour {
     public void EndGameUI()
     {
         winGameUI.SetActive(true);
+    }
+    public void ToggleUI(string elemName)
+    {
+        GameObject tempObj = new GameObject();
+        switch (elemName)
+        {
+            case "AngleSet":
+                tempObj = uiTexts[0];
+                break;
+        }
+
+        if (tempObj.activeInHierarchy)
+            tempObj.SetActive(false);
+        else
+            tempObj.SetActive(true);
+    }
+
+    public void UpdateText(string textObj, string newText)
+    {
+
+        switch(textObj)
+        {
+            case "Angle":
+                uiTexts[1].GetComponent<Text>().text = "ANGLE: " + newText;
+                break;
+        }
     }
 }
