@@ -9,6 +9,7 @@ public class UIController : MonoBehaviour {
     [SerializeField] Transform uiLastPos;
     [SerializeField] GameObject winGameUI;
     [SerializeField] GameObject[] uiTexts = new GameObject[10];
+    private GameObject tempObj;
 
     private void Start()
     {
@@ -38,7 +39,7 @@ public class UIController : MonoBehaviour {
     }
     public void ToggleUI(string elemName)
     {
-        GameObject tempObj = new GameObject();
+      
         switch (elemName)
         {
             case "AngleSet":
