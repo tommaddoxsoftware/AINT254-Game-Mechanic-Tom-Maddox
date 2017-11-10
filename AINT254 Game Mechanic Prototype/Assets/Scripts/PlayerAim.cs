@@ -20,16 +20,19 @@ public class PlayerAim : MonoBehaviour {
     //Mouse Positions
     private Vector3 m_mouseDownPos;
     private Vector3 m_mouseUpPos;
-    float m_mouseDiffY;
+    private float m_mouseDiffY;
+
+    private float rotAngle;
 
     //Useful Calculation vars for mouse drag
     float gameMaxY;
     float diffPercentPower;
 
-    //Check if object is touching environment
-    private bool isTouching = false;
     private bool moving = false;
     private bool angleSet = false;
+
+    private UIController uiControl;
+    [SerializeField] GameObject angleSetUI;
 
     // Use this for initialization
     void Start () {
@@ -51,12 +54,19 @@ public class PlayerAim : MonoBehaviour {
         aimObject.transform.parent = aimContainer.transform;
 
         uiManager = GameObject.Find("UIController");
+        uiControl = uiManager.GetComponent<UIController>();
 	}
 	
 	// Update is called once per frame
 	void Update () {        
      
-     
+     if(angleSet && Input.GetMouseButtonDown(1))
+        {
+            //User right clicked - reset the rotation and UI states!
+            angleSet = false;
+            m_transform.localRotation = Quaternion.Euler(0, 0, 0);
+            uiControl.ToggleUI("AngleSet");
+        }
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
             m_mouseDownPos = Input.mousePosition;    
@@ -75,8 +85,8 @@ public class PlayerAim : MonoBehaviour {
                 moving = true;
 
                 //Scale UI power bars!
-                uiManager.GetComponent<UIController>().SetLastPosScale();
-                uiManager.GetComponent<UIController>().ResetPowerBar();
+                uiControl.SetLastPosScale();
+                uiControl.ResetPowerBar();
 
                 angleSet = false;
                 
@@ -84,6 +94,7 @@ public class PlayerAim : MonoBehaviour {
             else
             {
                 angleSet = true;
+                uiControl.ToggleUI("AngleSet");
             }
                 aimObject.SetActive(false);
         }
@@ -95,7 +106,7 @@ public class PlayerAim : MonoBehaviour {
 
             if (!moving && !angleSet)
             {
-                float rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
+                rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
                 m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
                 aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
                 Aim();
@@ -130,14 +141,13 @@ public class PlayerAim : MonoBehaviour {
         {    
             aimObject.transform.position = aimContainer.transform.position;
             aimObject.SetActive(true);
+
+            int angle = (int)rotAngle;
+            uiControl.UpdateText("Angle", angle.ToString());
         }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Obstacle")
-        {
-            isTouching = true;
-            Debug.Log("IsTouching True");
-        }
+
 
         if(other.tag == "Finish")
         {
@@ -145,11 +155,5 @@ public class PlayerAim : MonoBehaviour {
             uiManager.GetComponent<UIController>().EndGameUI();
         }
     }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "Obstacle")
-        {
-            isTouching = false;
-        }
-    }
+
 }
