@@ -29,6 +29,7 @@ public class PlayerAim : MonoBehaviour {
     //Check if object is touching environment
     private bool isTouching = false;
     private bool moving = false;
+    private bool angleSet = false;
 
     // Use this for initialization
     void Start () {
@@ -64,7 +65,7 @@ public class PlayerAim : MonoBehaviour {
     if (UnityEngine.Input.GetMouseButtonUp(0))
         {            
            //Ensure player cant move whilst car is still in motion
-            if (!moving)
+            if (!moving && angleSet)
             {   
                 //Modify force based on how much the mouse was dragged, then apply the force
                 m_force = base_force * (diffPercentPower/5);
@@ -76,7 +77,13 @@ public class PlayerAim : MonoBehaviour {
                 //Scale UI power bars!
                 uiManager.GetComponent<UIController>().SetLastPosScale();
                 uiManager.GetComponent<UIController>().ResetPowerBar();
+
+                angleSet = false;
                 
+            }
+            else
+            {
+                angleSet = true;
             }
                 aimObject.SetActive(false);
         }
@@ -86,24 +93,26 @@ public class PlayerAim : MonoBehaviour {
             m_mouseUpPos = Input.mousePosition;
             m_mouseUpPos.z = 0;
 
-            if (!moving)
+            if (!moving && !angleSet)
             {
                 float rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
                 m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
                 aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
                 Aim();
             }
+            else
+            {
+                //Set mouse difference, then calculate percentage change
+                m_mouseDiffY = (m_mouseDownPos.y - m_mouseUpPos.y) * 1.5f;
+                diffPercentPower = (m_mouseDiffY / gameMaxY) * 100;
 
-            //Set mouse difference, then calculate percentage change
-            m_mouseDiffY = (m_mouseDownPos.y - m_mouseUpPos.y) * 1.5f;
-            diffPercentPower = (m_mouseDiffY / gameMaxY) * 100;
+                //Cap mouse drag at 100% difference.
+                if (diffPercentPower > 100)
+                    diffPercentPower = 100;
 
-            //Cap mouse drag at 100% difference.
-            if (diffPercentPower > 100)
-                diffPercentPower = 100;
-            
-            //Scale power bar appropriately
-            uiManager.GetComponent<UIController>().ScalePowerBar(new Vector3(1, diffPercentPower / 100, 1));
+                //Scale power bar appropriately
+                uiManager.GetComponent<UIController>().ScalePowerBar(new Vector3(1, diffPercentPower / 100, 1));
+            }
 
         }
     }
@@ -133,7 +142,6 @@ public class PlayerAim : MonoBehaviour {
         if(other.tag == "Finish")
         {
             //Display End UI
-
             uiManager.GetComponent<UIController>().EndGameUI();
         }
     }
