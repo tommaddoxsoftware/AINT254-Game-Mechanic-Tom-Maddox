@@ -31,7 +31,8 @@ public class PlayerAim : MonoBehaviour {
 
     //Used to check what's happening in the game
     private bool moving = false;
-    private bool angleSet = false;
+    public bool angleSet = false;
+    public bool tutorial = false;
 
     private UIController uiControl;
 
@@ -60,79 +61,81 @@ public class PlayerAim : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {        
-     
-     if(angleSet && Input.GetMouseButtonDown(1))
+	void Update () {
+        if (!tutorial)
         {
-            //User right clicked - reset the rotation and UI states!
-            angleSet = false;
-            m_transform.localRotation = Quaternion.Euler(0, 0, 0);
-            uiControl.ToggleUI("AngleSet");
-        }
-     if(UnityEngine.Input.GetMouseButtonDown(0))
-        {
-            tempTransform = m_transform;
-            m_mouseDownPos = Input.mousePosition;    
-            m_mouseDownPos.z = 0;
-            
-        }
-    if (UnityEngine.Input.GetMouseButtonUp(0))
-        {            
-           //Ensure player cant move whilst car is still in motion
-            if (!moving && angleSet)
-            {   
-                //Modify force based on how much the mouse was dragged, then apply the force
-                m_force = base_force * (diffPercentPower/5);
-                Debug.Log("m_force:" + m_force);
-                if(m_force > 0)
-                m_rigidbody.AddForce(transform.forward * (m_force));
-                moving = true;
-
-                //Scale UI power bars!
-                uiControl.SetLastPosScale();
-                uiControl.ResetPowerBar();
-
-                angleSet = false;
-                
-            }
-            else
+            if (angleSet && Input.GetMouseButtonDown(1))
             {
-                angleSet = true;
-                m_rigidbody.constraints = RigidbodyConstraints.None;
+                //User right clicked - reset the rotation and UI states!
+                angleSet = false;
+                m_transform.localRotation = Quaternion.Euler(0, 0, 0);
                 uiControl.ToggleUI("AngleSet");
             }
+            if (UnityEngine.Input.GetMouseButtonDown(0))
+            {
+                tempTransform = m_transform;
+                m_mouseDownPos = Input.mousePosition;
+                m_mouseDownPos.z = 0;
+
+            }
+            if (UnityEngine.Input.GetMouseButtonUp(0))
+            {
+                //Ensure player cant move whilst car is still in motion
+                if (!moving && angleSet)
+                {
+                    //Modify force based on how much the mouse was dragged, then apply the force
+                    m_force = base_force * (diffPercentPower / 5);
+                    Debug.Log("m_force:" + m_force);
+                    if (m_force > 0)
+                        m_rigidbody.AddForce(transform.forward * (m_force));
+                    moving = true;
+
+                    //Scale UI power bars!
+                    uiControl.SetLastPosScale();
+                    uiControl.ResetPowerBar();
+
+                    angleSet = false;
+
+                }
+                else
+                {
+                    angleSet = true;
+                    m_rigidbody.constraints = RigidbodyConstraints.None;
+                    uiControl.ToggleUI("AngleSet");
+                }
                 aimObject.SetActive(false);
-        }
-
-    if(Input.GetMouseButton(0))
-        {
-            m_mouseUpPos = Input.mousePosition;
-            m_mouseUpPos.z = 0;
-
-            if (!moving && !angleSet)
-            {
-                //Stop the position changing while aiming
-                m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
-                rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
-                m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
-                m_transform.position = tempTransform.position;
-                aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
-                Aim();
-            }
-            else
-            {
-                //Set mouse difference, then calculate percentage change
-                m_mouseDiffY = (m_mouseDownPos.y - m_mouseUpPos.y) * 1.5f;
-                diffPercentPower = (m_mouseDiffY / gameMaxY) * 100;
-
-                //Cap mouse drag at 100% difference.
-                if (diffPercentPower > 100)
-                    diffPercentPower = 100;
-
-                //Scale power bar appropriately
-                uiManager.GetComponent<UIController>().ScalePowerBar(new Vector3(1, diffPercentPower / 100, 1));
             }
 
+            if (Input.GetMouseButton(0))
+            {
+                m_mouseUpPos = Input.mousePosition;
+                m_mouseUpPos.z = 0;
+
+                if (!moving && !angleSet)
+                {
+                    //Stop the position changing while aiming
+                    m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+                    rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
+                    m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
+                    m_transform.position = tempTransform.position;
+                    aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
+                    Aim();
+                }
+                else
+                {
+                    //Set mouse difference, then calculate percentage change
+                    m_mouseDiffY = (m_mouseDownPos.y - m_mouseUpPos.y) * 1.5f;
+                    diffPercentPower = (m_mouseDiffY / gameMaxY) * 100;
+
+                    //Cap mouse drag at 100% difference.
+                    if (diffPercentPower > 100)
+                        diffPercentPower = 100;
+
+                    //Scale power bar appropriately
+                    uiManager.GetComponent<UIController>().ScalePowerBar(new Vector3(1, diffPercentPower / 100, 1));
+                }
+
+            }
         }
     }
     private void FixedUpdate()
