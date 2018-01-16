@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class PlayerAim : MonoBehaviour {
@@ -40,10 +39,10 @@ public class PlayerAim : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
-       
+
         //Find Width and height of the camera - used to find percentage difference with mouse drag
-        string[] res = UnityStats.screenRes.Split('x');
-        gameMaxY = float.Parse(res[1]);       
+    
+        gameMaxY = Screen.height;
 
         //Create Transform reference - Efficiency!
         m_transform = transform;

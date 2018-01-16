@@ -17,4 +17,17 @@ public class MenuScript : MonoBehaviour {
     {
         SceneManager.LoadScene("Tracks");
     }
+    public void LoadMenu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+    public void LoadTrack(int id)
+    {
+        switch(id)
+        {
+            case 1:
+                SceneManager.LoadScene("StuntScene");
+                break;
+        }
+    }
 }
