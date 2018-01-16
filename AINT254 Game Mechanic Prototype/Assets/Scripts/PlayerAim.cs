@@ -12,6 +12,7 @@ public class PlayerAim : MonoBehaviour {
 
     private Transform m_transform; //Make a reference for the transform
     private Rigidbody m_rigidbody; //Rigidbody of the player object
+    private Transform tempTransform;
 
     //Vars for the force
     [SerializeField] private float base_force = 500f;
@@ -70,8 +71,10 @@ public class PlayerAim : MonoBehaviour {
         }
      if(UnityEngine.Input.GetMouseButtonDown(0))
         {
+            tempTransform = m_transform;
             m_mouseDownPos = Input.mousePosition;    
             m_mouseDownPos.z = 0;
+            
         }
     if (UnityEngine.Input.GetMouseButtonUp(0))
         {            
@@ -95,6 +98,7 @@ public class PlayerAim : MonoBehaviour {
             else
             {
                 angleSet = true;
+                m_rigidbody.constraints = RigidbodyConstraints.None;
                 uiControl.ToggleUI("AngleSet");
             }
                 aimObject.SetActive(false);
@@ -107,8 +111,11 @@ public class PlayerAim : MonoBehaviour {
 
             if (!moving && !angleSet)
             {
+                //Stop the position changing while aiming
+                m_rigidbody.constraints = RigidbodyConstraints.FreezeAll;
                 rotAngle = m_transform.rotation.x - (m_mouseDownPos.x - m_mouseUpPos.x);
                 m_transform.localRotation = Quaternion.Euler(0, rotAngle, 0);
+                m_transform.position = tempTransform.position;
                 aimContainer.transform.rotation = Quaternion.Euler(0, rotAngle, 0);
                 Aim();
             }
@@ -139,7 +146,7 @@ public class PlayerAim : MonoBehaviour {
 
     //Some notes - Camera X is left/right,, Camera Y is up/down. Z not used.
     private void Aim()
-        {    
+        {
             aimObject.transform.position = aimContainer.transform.position;
             aimObject.SetActive(true);
 
